@@ -1,0 +1,135 @@
+
+
+.slide-container .ng-enter,
+.slide-container .ng-leave {
+  -webkit-transition:all linear 0.3s;
+  -moz-transition:all linear 0.3s;
+  -o-transition:all linear 0.3s;
+  transition:all linear 0.3s;
+
+  position:absolute;  
+}
+
+
+
+.slide-container.left .ng-enter {
+  left:-100%;
+}
+
+.slide-container .ng-enter.ng-enter-active, .slide-container .ng-leave {
+  left:0;
+}
+
+.slide-container.left .ng-leave.ng-leave-active {
+  left:100%;
+}
+
+
+@media(max-width: 992px) {
+        .container-and-fluid {
+            padding: 0px !important;
+        }
+   }
+
+md-progress-linear{
+    display:none;
+}
+#stock_title{
+    width:200px;
+    margin:0 auto;
+}
+md-autocomplete > md-autocomplete-wrap > md-progress-linear { display: none; }
+
+.new{
+    height:50px !important;
+}
+
+.symbollink:hover{
+    cursor: pointer;
+}
+md-autocomplete[md-floating-label] md-autocomplete-wrap {
+    height: 53px !important;
+}
+#high_div{
+    background-image: url("http://cs-server.usc.edu:45678/hw/hw8/images/background.png");
+    background-repeat: repeat;
+    min-height: 100%;
+}
+#top_div{
+    
+}
+#fav_div{
+    top:40px;
+    padding:20px;
+}
+#detail_view{
+    top:40px;
+}
+#mid1_hr{
+    margin: 5px !important;
+}
+#mid_hr{
+    position: relative;
+    top:3px;
+}
+.main_div{
+    background: #FFF;
+    border-radius:10px;
+    padding: 15px;
+}
+
+.custom-select{
+    height:30px;
+    width:180px;
+}
+#toggle_div{
+    position: relative;
+    top:-5px;
+    float:right;
+}
+md-input-container .md-input{
+    position: relative;
+    top:-15px;
+    border-width: 1px 1px 1px !important;
+    border-radius:3px;
+}
+#error_span{
+    position: relative;
+    top:-15px;
+}
+.hide-label label {
+  visibility: hidden;
+}
+#stock_title{
+    position: relative;
+    top:-25px;
+    text-align: center;
+}
+.glyphicon-star {
+    color:gold !important;
+}
+.star{
+    font-size: 22px;
+}
+.face{
+    font-size: 23px;
+    color:#3B5998;
+    position: relative;
+    left:9px;
+}
+#priceDiv{
+    position:relative;
+    top:20px;
+}
+#panel_detail_div{
+    padding: 10px;
+
+}
+#panel_detail{
+    border: 1px grey solid;
+}
+#news_text{
+    font-size: 20px;
+    text-decoration: none;
+}
+    

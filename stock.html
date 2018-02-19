@@ -1,0 +1,1941 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        <link rel="stylesheet" href="stock.css">
+    
+        <!-- jQuery library -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+
+        <!-- Latest compiled JavaScript -->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        
+        <script type="text/javascript" src="https://cdn.datatables.net/r/bs-3.3.5/jqc-1.11.3,dt-1.10.8/datatables.min.js"></script>
+        <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+        <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+        <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.css">
+        <script src='http://connect.facebook.net/en_US/all.js'></script>
+        
+        <!-- Angular Material requires Angular.js Libraries -->
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-animate.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-aria.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-messages.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-animate.js"></script>
+        <script src="https://code.highcharts.com/stock/highstock.js"></script>
+        <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.js"></script>
+        <script type="text/javascript" src="connect.facebook.net/en_us/all.js"></script>
+        
+    </head>
+    <script>
+        FB.init({
+        appId: '642989659422940',
+        status: true,
+        cookie: true,
+        xfbml: true
+    });
+    </script>
+    
+    <body ng-app="formApp" ng-controller="formCtrl as ctrl" >
+        <div id = "high_div">
+        <div id = "full_div" class = "container">
+            <div id = "top_div" class="main_div">
+                <!-- Stack the columns on mobile by making one full-width and the other half-width -->
+
+                  <div><h5 align="center">Stock Market Search</h5></div>
+                <div class="row" >
+                    <div layout=column>
+                    <md-content class="md-padding">
+                    <form  class = "form-group" name="myForm">
+                    <div class="col-md-3 mb-2"><h5 id="Enter_text">Enter Stock Ticker Symbol:<text color = "red">*</text></h5></div>
+                    <div class="col-md-5 mb-4"><!--<input type="text" name="symbol" class="form-control" placeholder="e.g. AAPL" ng-model="text" required>-->
+                            <md-autocomplete
+                              class="hide-label"
+                              id="symbol"
+                              required=""
+                              flex=""
+                              md-input-name="symbol"
+                              md-selected-item="ctrl.selectedItem"
+                              md-search-text="ctrl.searchText"
+                              md-selected-item-change="ctrl.selectedItemChange(item)"
+                              md-items="item in ctrl.querySearch(ctrl.searchText)"
+                              md-item-text="item.Symbol"
+                              md-min-length="1"
+                              placeholder="e.g. AAPL"
+                             md-floating-label="favourite state">
+                            <md-item-template>
+                              <span md-highlight-text="ctrl.searchText" md-highlight-flags="^i">{{item.Symbol}} - {{item.Name}} - ({{item.Exchange}})</span>
+                            </md-item-template>   
+                    <span id="error_span" ng-show="myForm.symbol.$touched&&myForm.symbol.$error.required">Please enter the stock ticker symbol</span>
+                    </md-autocomplete>
+                    </div>
+                    <div id = "third_row" class="col-md-4 mb-3"> 
+                            <button id="submit_button" type="submit" class="btn btn-primary" ng-click="getAllData()">
+                            <span class="glyphicon glyphicon-search"></span> Get Quote
+                            </button>
+                            <button id="clear_button" type="reset" class="btn btn-default">
+                            <span class="glyphicon glyphicon-refresh"></span> Clear
+                            </button>
+                    </div>
+                    </form>
+                    </md-content>
+                    </div>
+                </div>
+            </div>
+            <hr id ="mid_hr">
+            <div class="main_div">
+            <div id="detail_view" class=" slide-container left" ngif="toggle">
+                <div id = "panel_detail_div">
+                <div id="panel_detail" class="panel panel-default">
+                    
+                    <div class="new panel-heading">
+                        
+                        <text><button id="slide_back" type="button" class="btn btn-default">
+                        <span class="glyphicon glyphicon-chevron-left"></span></button><h5 class="panel-title" id="stock_title">Stock Details</h5></text>
+                        
+                    </div>
+                    <div class="panel-body">
+                        <ul class="nav nav-pills">
+                        <li class="active"><a data-toggle="pill" href="#currentStock"><span class="glyphicon glyphicon-dashboard"></span> <text class="hidden-sm hidden-xs">Current</text> Stock</a></li>
+                        <li><a data-toggle="pill" href="#historicCharts"><span class="glyphicon glyphicon-stats"></span> <text class="hidden-sm hidden-xs">Historic</text> Charts</a></li>
+                        <li><a data-toggle="pill" href="#newsFeeds"><span class="glyphicon glyphicon-link"></span> News <text class="hidden-sm hidden-xs">Feeds</text></a></li>
+                      </ul>
+                        <hr id ="mid1_hr">
+                       <div class="tab-content">
+                            <div id="currentStock" class="tab-pane fade in active">
+                              <div class="row">
+                                  <div class="col-md-6 mb-3">
+                                        <div class = "row">
+                                            <div class="col-xs-9 mb-3">
+                                            <h5 class="panel-title">Stock Details</h5>
+                                            </div>
+                                            <div class="col-xs-1 mb-3">
+                                                <button id="fav_button" class="btn btn-default star glyphicon glyphicon-star-empty"></button>
+                                            </div>
+                                            <div class="col-xs-1 mb-3">
+                                              <button id="fb_button"class="btn btn-default face fa fa-facebook-square"></button>
+                                            </div>
+                                        </div>
+                                       
+                                      <div id = "priceDiv" class = "table-responsive">
+                                        
+                                    </div>
+                                  </div>
+                                  <div class="col-md-6 mb-3" padding-top="10px">
+                                      <ul id="chart_tab"class="nav nav-tabs">
+                                          <li class="active"><a data-toggle="tab" href="#priceTab">Price</a></li>
+                                          <li><a data-toggle="tab" href="#smaTab">SMA</a></li>
+                                          <li><a data-toggle="tab" href="#emaTAb">EMA</a></li>
+                                          <li><a data-toggle="tab" href="#stochTab">STOCH</a></li>
+                                          <li><a data-toggle="tab" href="#rsiTab">RSI</a></li>
+                                          <li><a data-toggle="tab" href="#adxTab">ADX</a></li>
+                                          <li><a data-toggle="tab" href="#cciTab">CCI</a></li>
+                                          <li><a data-toggle="tab" href="#bbandsTab">BBANDS</a></li>
+                                          <li><a data-toggle="tab" href="#macdTab">MACD</a></li>
+                                        </ul>
+
+                                        <div class="tab-content">
+                                          <div id="priceTab" class="tab-pane fade in active">
+                                            <div id = "pDiv">
+                                            </div>
+                                          </div>
+                                          <div id="smaTab" class="tab-pane fade">
+                                            <div id = "smaDiv">
+                                            </div>
+                                          </div>
+                                          <div id="emaTAb" class="tab-pane fade">
+                                            <div id = "emaDiv">
+                                            </div>
+                                          </div>
+                                          <div id="stochTab" class="tab-pane fade">
+                                            <div id = "stochDiv">
+                                            </div>
+                                          </div>
+                                          <div id="rsiTab" class="tab-pane fade">
+                                                 <div id = "rsiDiv">
+                                                </div>
+                                          </div>
+                                          <div id="adxTab" class="tab-pane fade">
+                                             <div id = "adxDiv">
+                                             </div>
+                                          </div>
+                                          <div id="cciTab" class="tab-pane fade">
+                                             <div id = "cciDiv">
+                                            </div>
+                                          </div>
+                                          <div id="bbandsTab" class="tab-pane fade">
+                                             <div id = "bbandsDiv">
+                                            </div>
+                                          </div>
+                                          <div id="macdTab" class="tab-pane fade">
+                                            <div id = "macdDiv">
+                                            </div>
+                                          </div>
+                                        </div>
+                                  </div>
+                              </div>
+                            </div>
+                            <div id="historicCharts" class="tab-pane fade">
+                              <div id = "hisDiv">
+                              </div>
+                            </div>
+                            <div id="newsFeeds" class="tab-pane fade">
+                              <div id = "newsDiv">
+                              </div>
+                            </div>
+                            
+                          </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+            <div id = "fav_div" class="slide-container right" ngif="toggle">
+            <div id = "panel" class="panel panel-default">
+              <div class="new panel-heading">
+                <text class="panel-title"><b>Favourite List</b>
+                <div id="toggle_div">
+                <text class="hidden-sm hidden-xs">Automatic Refresh:</text>
+                    <input id="auto_refresh" type="checkbox" data-toggle="toggle">
+                <button id = "refresh_button" type="button" class="btn btn-default">
+                <span class="glyphicon glyphicon-refresh"></span></button>
+                <button id="slide-right" type="button" class="btn btn-default">
+                <span class="glyphicon glyphicon-chevron-right"></span></button>
+                </div>
+                </text>
+              </div>
+              <div class="panel-body">
+                <div class="row">
+                <div class="col-md-1"><h6>Sort By</h6></div>
+                <div class="col-md-3">
+                    <select id ="sort_by" class="custom-select">
+                          <option value="symbol" selected>Default</option>
+                          <option value="symbol">Symbol</option>
+                          <option value="close">Price</option>
+                          <option value="change">Change</option>
+                          <option value="percent">Change Percent</option>
+                          <option value="volume">Volume</option>
+                    </select>
+                </div>
+                <div class="col-md-1"><h6>Order</h6></div>
+                <div class="col-md-3">
+                    <select id="order" class="custom-select">
+                          <option selected>Ascending</option>
+                          <option value="2">Descending</option>
+                    </select>
+                </div>
+                </div>
+              </div>
+                <div class = " table-responsive">
+                <table id = "data_table" class="table table-striped">
+                  <thead>
+                    <tr>
+                      <th>Symbol</th>
+                      <th>Stock Price</th>
+                      <th>Change(Change Percent)</th>
+                      <th>Volume</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                    <tbody id = "fav_table"></tbody>
+                </table>
+            </div>
+            </div>
+        </div>
+        </div>
+        </div>
+        </div>
+        <script>
+            
+        var responseData;
+        var responseDataSMA;
+        var responseDataEMA;
+        var responseDataADX;
+        var responseDataCCI;
+        var responseDataSTOCH;
+        var responseDataRSI;
+        var responseDataBBANDS;
+        var responseDataMACD;
+        var responseDataNews;
+        var responseSymbol;
+         $(function() {
+            $('#auto_refresh').bootstrapToggle();
+          }); 
+        
+         $("#sort_by").change(function(){
+             updateFavView();
+         });
+         $("#order").change(function(){
+            updateFavView();
+         });
+         function sortList(){
+             var sortBy = $("#sort_by option:selected").val();
+             var order =  $("#order").val();
+             var favlist = JSON.parse(localStorage.getItem("favlist"));
+             favlist.sort(function(a,b){
+            if(order=="Ascending"){
+                   if(sortBy=="symbol"){
+                        var x = a[sortBy].toLowerCase();
+                        var y = b[sortBy].toLowerCase();
+                        if (x < y) {return 1;}
+                        if (x > y) {return -1;}
+                        return 0;
+                    }else{
+                        var x =Number(a[sortBy]) ;
+                        var y = Number(b[sortBy]);
+                        
+                        return y-x;
+                    }
+                }else if(order==2){
+                    if(sortBy=="symbol"){
+                        var x = a[sortBy].toLowerCase();
+                        var y = b[sortBy].toLowerCase();
+                        if (x < y) {return -1;}
+                        if (x > y) {return 1;}
+                        return 0;
+                    }else{
+                        var x = Number(a[sortBy]);
+                        var y = Number(b[sortBy]);
+                        
+                        return x-y;
+                    }
+                    
+                }
+                
+            });
+            localStorage.setItem("favlist",JSON.stringify(favlist));
+         }
+        $(document).ready(function(){
+                $("#detail_view").hide();
+                updateFavView();
+                
+                if($(this).val().trim().length ==0){
+                    $('#submit_button').attr('disabled', true);
+                }
+                $('#fl-input-0').keyup(function(){
+                if($(this).val().trim().length !=0){
+                    $('#submit_button').attr('disabled', false);
+                }else{
+                    $('#submit_button').attr('disabled', true);
+                }
+            });
+          $("#slide-right").attr('disabled',true);
+
+        });
+            
+        $("#fb_button").click(function(){
+            var active = $("ul#chart_tab li.active").text();
+            var container;
+            if(active=="Price"){
+                container = "#pDiv";
+            }else if(active=="SMA"){
+                container = "#smaDiv";
+            }else if(active=="EMA"){
+                container = "#emaDiv";
+            }else if(active == "STOCH"){
+                container = "#stochDiv";
+            }else if(active=="RSI"){
+                container = "#rsiDiv";
+            }else if(active=="ADX"){
+                container = "#adxDiv";
+            }else if(active=="CCI"){
+                container = "#cciDiv";
+            }else if(active == "BBANDS"){
+                container = "#bbandsDiv";
+            }else if(active=="MACD"){
+                container = "#macdDiv";
+            }
+            
+            var chartConfig = $(container).highcharts().options;
+            var data = {
+                    options: JSON.stringify(chartConfig),
+                    filename: "filename",
+                    type: 'image/png',
+                    async: true
+                };
+
+                var exportUrl = 'http://export.highcharts.com/';
+                $.post(exportUrl, data, function(returndata) {
+                    var url = exportUrl + returndata;
+                    FB.ui({	
+                       app_id:	642989659422940,	
+                        method:	'feed',	
+                        picture:	url
+                    },	(response)	=>	{	
+                    if	(response	&&	!response.error_message)	{	
+                        alert("Posted Succesfully");	
+                    }	else	{	
+                                    //fail	
+                    }	
+            });
+                });
+
+        });
+        (function () {
+        'use strict';
+        var app = angular.module('formApp',['ngMaterial','ngAnimate']);
+        app.controller('formCtrl', DemoCtrl);
+            
+        function DemoCtrl($scope,$timeout, $q, $log, $http) {
+
+        $scope.visible = false;
+        var self = this;
+
+        self.myValue = false;
+        self.querySearch = querySearch;
+        self.selectedItemChange = selectedItemChange;
+        self.searchTextChange = searchTextChange;
+
+        function querySearch(query) {
+          var parameters = {
+                    symbol:query
+                };
+                var config = {
+                    params: parameters
+                };
+          var deferred = $q.defer();
+         // $http.get('http://localhost:3000/auto',config)
+            $http.get('http://stock-aselvam.us-east-2.elasticbeanstalk.com/auto',config)
+            .success(function(results) {
+              deferred.resolve(JSON.parse(results));
+            }).error(function(results) {
+              deferred.reject(results);
+            });
+
+          return deferred.promise;
+        }
+
+        function searchTextChange(text) {
+          $log.info('Text changed to ' + text);
+        }
+
+        function selectedItemChange(item) {
+          $log.info('Item changed to ' + JSON.stringify(item));
+          //search = item.Symbol;
+        }
+
+        $scope.reset = function(myForm) {
+                     $("$slide-right").attr("disabled",true);
+                     myForm.$setPristine();
+                     myForm.$setUntouched();
+        }
+        $scope.getAllData = function(){
+           // $scope.visible = !scope.visible;
+            var search = $("#fl-input-0").val();
+                 AJAXCall(search);
+           };
+        $("#slide-right").click(function(){
+             $("#detial_view").addClass("ng-show");
+             $("#detial_view").removeClass("ng-hide");
+             $("#favt_div").addClass("ng-hide");
+             $("#favt_div").removeClass("ng-show");
+            $("#detail_view").animate({width: 'toggle'}, "fast");
+                window.setTimeout(function(){
+                    $("#fav_div").hide();
+                }, 300);
+        });
+        function AJAXCall(search){
+                
+               $("#slide-right").attr("disabled",false);
+                $("#detial_view").addClass("ng-show");
+                $("#detial_view").removeClass("ng-hide");
+                $("#favt_div").addClass("ng-hide");
+                $("#favt_div").removeClass("ng-show");
+    
+                var parent = $('#main_div');
+                parent.height(parent.height());
+               $("#fav_div").animate({width: 'toggle'}, "fast");
+                window.setTimeout(function(){
+                    $("#detail_view").show();
+                }, 300);
+                
+                
+                var isFav = checkFavourites(search);
+                if(isFav == true){
+                    $(".star.glyphicon").addClass("glyphicon-star");
+                    $(".star.glyphicon").removeClass("glyphicon-star-empty");
+                }else{
+                    $(".star.glyphicon").removeClass("glyphicon-star");
+                    $(".star.glyphicon").addClass("glyphicon-star-empty");
+                }
+                var progress = "<div class=\"progress\" style=\"height:44px;\"><div class=\"progress-bar progress-bar-striped active\" role=\"progressbar\" style=\"width:50%;\"></div></div>";
+
+                 document.getElementById("priceDiv").innerHTML = progress;
+                 document.getElementById("hisDiv").innerHTML = progress;
+                 document.getElementById("newsDiv").innerHTML = progress;
+                 document.getElementById("pDiv").innerHTML = progress;
+                 document.getElementById("smaDiv").innerHTML = progress;
+                 document.getElementById("emaDiv").innerHTML = progress;
+                 document.getElementById("stochDiv").innerHTML = progress;
+                document.getElementById("bbandsDiv").innerHTML = progress;
+                document.getElementById("adxDiv").innerHTML = progress;
+                document.getElementById("rsiDiv").innerHTML = progress;
+                document.getElementById("macdDiv").innerHTML = progress;
+                document.getElementById("cciDiv").innerHTML = progress;
+                $("#slide-right").attr('disabled',false);
+                $("#fb_button").attr('disabled',true);
+                $("#fav_button").attr('disabled',true);
+                 
+                getAndSetData(search);
+            }    
+            }
+        })();
+            
+        function checkFavourites(search){
+            var flag = false;
+            var favlist = JSON.parse(localStorage.getItem("favlist"));
+            if(favlist!=null){
+                for(i=0;i<favlist.length;i++){
+                if(favlist[i].symbol == search){
+                    flag = true;
+                    break;
+                    }
+                }
+            }
+            
+            return flag;
+        }
+            
+        function getData(search){
+                $("#detial_view").addClass("ng-show");
+                $("#detial_view").removeClass("ng-hide");
+                $("#favt_div").addClass("ng-hide");
+                $("#favt_div").removeClass("ng-show");
+                var parent = $('#main_div');
+                parent.height(parent.height());
+                $("#fav_div").animate({width: 'toggle'}, "fast");
+                window.setTimeout(function(){
+                    $("#detail_view").show();
+                }, 300);
+                var symbol = search.getAttribute("valuesymbol");
+                $("#fl-input-0").val(symbol);
+                var isFav = checkFavourites(search.getAttribute("valuesymbol"));
+                if(isFav == true){
+                    $(".star.glyphicon").addClass("glyphicon-star");
+                    $(".star.glyphicon").removeClass("glyphicon-star-empty");
+                }else{
+                    $(".star.glyphicon").removeClass("glyphicon-star");
+                    $(".star.glyphicon").addClass("glyphicon-star-empty");
+                }
+                var progress = "<div class=\"progress\" style=\"height:44px;\"><div class=\"progress-bar progress-bar-striped active\" role=\"progressbar\" style=\"width:50%;\"></div></div>";
+                document.getElementById("priceDiv").innerHTML = progress;
+                document.getElementById("hisDiv").innerHTML = progress;
+                document.getElementById("newsDiv").innerHTML = progress;
+                document.getElementById("pDiv").innerHTML = progress;
+                document.getElementById("smaDiv").innerHTML = progress;
+                document.getElementById("emaDiv").innerHTML = progress;
+                document.getElementById("stochDiv").innerHTML = progress;
+                document.getElementById("bbandsDiv").innerHTML = progress;
+                document.getElementById("adxDiv").innerHTML = progress;
+                document.getElementById("rsiDiv").innerHTML = progress;
+                document.getElementById("macdDiv").innerHTML = progress;
+                document.getElementById("cciDiv").innerHTML = progress;
+                $("#slide-right").attr('disabled',false);
+                $("#fb_button").attr('disabled',true);
+                $("#fav_button").attr('disabled',true);
+                getAndSetData(symbol);
+            
+        }
+        function getAndSetData(symbol){
+             var parameters = {
+                    symbol:symbol
+             }
+             try{
+                 $.ajax({
+                   // url:'http://localhost:3000/price', 
+                    url:'http://stock-aselvam.us-east-2.elasticbeanstalk.com/price', 
+                    data:parameters,
+                    type:'GET',
+                    success: function (response,status,xhr) {
+                        $("#fb_button").attr('disabled',false);
+                        $("#fav_button").attr('disabled',false);
+                        responseData = JSON.parse(response);
+                        displayPriceTable(responseData);
+                        displayPriceChart(responseData);
+                        displayHistoricalChart(responseData);
+                    },
+                    error: function (xhr,status,error) {
+                        document.getElementById("priceDiv").innerHTML = "<div class=\"alert alert-danger\" role=\"alert\">Error! Failed to get current Stock Data</div>";
+                        document.getElementById("hisDiv").innerHTML = "<div class=\"alert alert-danger\" role=\"alert\">Error! Failed to get Historical Charts Data</div>";
+                        document.getElementById("pDiv").innerHTML = "<div class=\"alert alert-danger\" role=\"alert\">Error! Failed to get Price Data</div>";
+                    }
+                }); 
+             }catch(Exception){
+                 document.getElementById("priceDiv").innerHTML = "<div class=\"alert alert-danger\" role=\"alert\">Error! Failed to get current Stock Data</div>";
+                 document.getElementById("hisDiv").innerHTML = "<div class=\"alert alert-danger\" role=\"alert\">Error! Failed to get Historical Charts Data</div>";
+                 document.getElementById("pDiv").innerHTML = "<div class=\"alert alert-danger\" role=\"alert\">Error! Failed to get Price Data</div>";
+             }
+            try{
+                $.ajax({
+                   // url:'http://localhost:3000/sma', 
+                    url:'http://stock-aselvam.us-east-2.elasticbeanstalk.com/sma', 
+                    data:parameters,
+                    type:'GET',
+                    success: function (response,status,xhr) {
+                        console.log(JSON.parse(response));
+                        responseDataSMA = JSON.parse(response);
+                        if(responseDataSMA.sma=={}){
+                        throw("Exception");
+                        }
+                        displaySMAChart(responseDataSMA);
+                    },
+                    error: function (xhr,status,error) {
+                        document.getElementById("smaDiv").innerHTML = "<div class=\"alert alert-danger\" role=\"alert\">Error! Failed to get SMA Data</div>";
+                    }
+                });
+            }catch(Exception){
+                document.getElementById("smaDiv").innerHTML = "<div class=\"alert alert-danger\" role=\"alert\">Error! Failed to get SMA Data</div>";
+            }
+            try{
+                $.ajax({
+                   // url:'http://localhost:3000/ema', 
+                   url:'http://stock-aselvam.us-east-2.elasticbeanstalk.com/ema', 
+                    data:parameters,
+                    type:'GET',
+                success: function (response,status,xhr) {
+                    console.log(JSON.parse(response));
+                    responseDataEMA = JSON.parse(response);
+                    if(responseDataEMA.ema=={}){
+                        throw("Exception");
+                    }
+                    displayEMAChart(responseDataEMA);
+                },
+                error: function (xhr,status,error) {
+                     document.getElementById("emaDiv").innerHTML = "<div class=\"alert alert-danger\" role=\"alert\">Error! Failed to get EMA Data</div>";
+                }
+                });
+            }catch(Exception){
+                document.getElementById("emaDiv").innerHTML = "<div class=\"alert alert-danger\" role=\"alert\">Error! Failed to get EMA Data</div>";
+            }
+            
+            try{
+                $.ajax({
+                    //url:'http://localhost:3000/stoch', 
+                    url:'http://stock-aselvam.us-east-2.elasticbeanstalk.com/stoch', 
+                    data:parameters,
+                    type:'GET',
+                success: function (response,status,xhr) {
+                    console.log(JSON.parse(response));
+                    responseDataSTOCH = JSON.parse(response);
+                    if(responseDataSTOCH.stoch=={}){
+                        throw("Exception");
+                    }
+                    displaySTOCHChart(responseDataSTOCH);
+                },
+                error: function (xhr,status,error) {
+                    document.getElementById("stochDiv").innerHTML = "<div class=\"alert alert-danger\" role=\"alert\">Error! Failed to get STOCH Data</div>";
+                }
+                });
+            }catch(Exception){
+                document.getElementById("stochDiv").innerHTML = "<div class=\"alert alert-danger\" role=\"alert\">Error! Failed to get STOCH Data</div>";
+            }
+            try{
+                $.ajax({
+                    //url:'http://localhost:3000/rsi', 
+                    url:'http://stock-aselvam.us-east-2.elasticbeanstalk.com/rsi', 
+                    data:parameters,
+                    type:'GET',
+                success: function (response,status,xhr) {
+                    console.log(JSON.parse(response));
+                    
+                    responseDataRSI = JSON.parse(response);
+                    if(responseDataRSI.rsi=={}){
+                        throw("Exception");
+                    }
+                    displayRSIChart(responseDataRSI);
+                },
+                error: function (xhr,status,error) {
+                     document.getElementById("rsiDiv").innerHTML = "<div class=\"alert alert-danger\" role=\"alert\">Error! Failed to get RSI Data</div>";
+                }
+                });
+            }catch(Exception){
+                document.getElementById("rsiDiv").innerHTML = "<div class=\"alert alert-danger\" role=\"alert\">Error! Failed to get RSI Data</div>";
+            }
+            
+            try{
+                $.ajax({
+              //  url:'http://localhost:3000/adx', 
+                url:'http://stock-aselvam.us-east-2.elasticbeanstalk.com/adx', 
+                data:parameters,
+                type:'GET',
+            success: function (response,status,xhr) {
+                console.log(JSON.parse(response));
+                responseDataADX = JSON.parse(response);
+                if(responseDataADX.adx=={}){
+                        throw("Exception");
+                    }
+                displayADXChart(responseDataADX);
+            },
+            error: function (xhr,status,error) {
+                document.getElementById("adxDiv").innerHTML = "<div class=\"alert alert-danger\" role=\"alert\">Error! Failed to get ADX Data</div>";
+            }
+            });
+            }catch(Exception){
+                document.getElementById("adxDiv").innerHTML = "<div class=\"alert alert-danger\" role=\"alert\">Error! Failed to get ADX Data</div>";
+            }
+            try{
+            $.ajax({
+               // url:'http://localhost:3000/cci', 
+                url:'http://stock-aselvam.us-east-2.elasticbeanstalk.com/cci', 
+                data:parameters,
+                type:'GET',
+            success: function (response,status,xhr) {
+                console.log(JSON.parse(response));
+                responseDataCCI = JSON.parse(response);
+                if(responseDataCCI.cci=={}){
+                        throw("Exception");
+                    }
+                displayCCIChart(responseDataCCI);
+            },
+            error: function (xhr,status,error) {
+                document.getElementById("cciDiv").innerHTML = "<div class=\"alert alert-danger\" role=\"alert\">Error! Failed to get CCI Data</div>";
+            }
+            });
+            }catch(Exception){
+                document.getElementById("cciDiv").innerHTML = "<div class=\"alert alert-danger\" role=\"alert\">Error! Failed to get CCI Data</div>";
+            }
+            
+            try{
+                $.ajax({
+                //url:'http://localhost:3000/bbands', 
+                url:'http://stock-aselvam.us-east-2.elasticbeanstalk.com/bbands', 
+                data:parameters,
+                type:'GET',
+                success: function (response,status,xhr) {
+                    console.log(JSON.parse(response));
+                    responseDataBBANDS = JSON.parse(response);
+                    if(responseDataBBANDS.bbands=={}){
+                        throw("Exception");
+                    }
+                    displayBBANDSChart(responseDataBBANDS);
+                },
+                error: function (xhr,status,error) {
+                     document.getElementById("bbandsDiv").innerHTML = "<div class=\"alert alert-danger\" role=\"alert\">Error! Failed to get BBANDS Data</div>";
+                }
+            });
+            }catch(Exception){
+                document.getElementById("bbandsDiv").innerHTML = "<div class=\"alert alert-danger\" role=\"alert\">Error! Failed to get BBANDS Data</div>";
+            }
+            
+            try{
+                $.ajax({
+                //url:'http://localhost:3000/macd', 
+                url:'http://stock-aselvam.us-east-2.elasticbeanstalk.com/macd', 
+                data:parameters,
+                type:'GET',
+                success: function (response,status,xhr) {
+                    console.log(JSON.parse(response));
+                    responseDataMACD = JSON.parse(response);
+                    if(responseDataMACD.macd=={}){
+                        throw(Exception);
+                    }
+                    displayMACDChart(responseDataMACD);
+                },
+                error: function (xhr,status,error) {
+                    document.getElementById("macdDiv").innerHTML = "<div class=\"alert alert-danger\" role=\"alert\">Error! Failed to get MACD Data</div>";
+                }
+            });
+            }catch(Ec){
+                document.getElementById("macdDiv").innerHTML = "<div class=\"alert alert-danger\" role=\"alert\">Error! Failed to get MACD Data</div>";
+            }
+            try{
+                $.ajax({
+              //  url:'http://localhost:3000/news', 
+                  url:'http://stock-aselvam.us-east-2.elasticbeanstalk.com/news', 
+                data:parameters,
+                type:'GET',
+                success: function (response,status,xhr) {
+                    console.log(JSON.parse(response));
+                    responseDataNews = JSON.parse(response);
+                    displayNews(responseDataNews);
+                },
+                error: function (xhr,status,error) {
+                    document.getElementById("newsDiv").innerHTML = "<div class=\"alert alert-danger\" role=\"alert\">Error! Failed to get news feed Data</div>";
+                }
+            });
+            }catch(ed){
+                document.getElementById("newsDiv").innerHTML = "<div class=\"alert alert-danger\" role=\"alert\">Error! Failed to get news feed Data</div>";
+            }
+            
+        }
+        function deleteFav(element){
+            var search = element.getAttribute("value");
+            removeFromFav(search);
+            updateFavView();
+            
+        }
+        function removeFromFav(search){
+                var favlist=JSON.parse(localStorage.getItem("favlist"));
+                var index;
+                if(favlist!=null){
+                    for(var i=0;i<favlist.length;i++){
+                    if(search==favlist[i].symbol){
+                        index = i;
+                        }
+                    }
+                    favlist.splice(index,1);
+                }
+                
+                localStorage.setItem("favlist",JSON.stringify(favlist));
+        }
+            
+        var autoRefresh;
+        $('#auto_refresh').change(function () {
+            if ($('#auto_refresh').prop('checked') === true) {
+                autoRefresh  =   setInterval(function(){ 
+                console.log("works");
+                   refreshFavourites();
+                }, 5000)
+            }
+            else if ($('#auto_refresh').prop('checked') === false){
+                clearInterval(autoRefresh);
+            }
+        });
+        
+        $("#refresh_button").click(function(){
+            refreshFavourites();
+            
+        });
+        function refreshFavourites(){
+            var favlist = JSON.parse(localStorage.getItem("favlist"));
+            var symbolList = [];
+            if(favlist!=null&&favlist.length!=0){
+                for(var i=0;i<favlist.length;i++){
+                    symbolList.push(favlist[i].symbol);
+                }
+                 var parameters = {
+                    symbolList:symbolList
+                };
+                $.ajax({
+                   // url:'http://localhost:3000/refresh', 
+                     url:'http://stock-aselvam.us-east-2.elasticbeanstalk.com/refresh', 
+                    data:parameters,
+                    type:'GET',
+                success: function (response,status,xhr) {
+                    var favlist = JSON.parse(response);
+                    console.log(favlist);
+                    localStorage.setItem("favlist",JSON.stringify(favlist));
+                    
+                    updateFavView();
+                },
+                 error: function (xhr,status,error) {
+                    alert("FAIL");
+                    }
+                });
+           }
+        }
+    
+        function updateProgress(percentage){
+            var elements = document.getElementsByClassName('progress-bar');
+            var i = 0; 
+            while(i<elements.length){
+               elements[i].style.width = percentage+'%';
+               i++;
+            }
+        }
+        
+            
+        $("#fav_button").click(function(){
+            if($("#fav_button").hasClass("glyphicon-star")){
+                //code to remove from favourites
+                removeFromFav(responseData.price.symbol);
+            }else{
+                //code to add to favourites
+                if(localStorage.getItem("favlist")!=null){
+                    var favlist=JSON.parse(localStorage.getItem("favlist"));
+                    favlist.push(responseData.price);
+                    localStorage.setItem("favlist",JSON.stringify(favlist));
+                }else{
+                    var favlist = [];
+                    favlist.push(responseData.price);
+                    localStorage.setItem("favlist",JSON.stringify(favlist));
+                }
+                
+            }
+
+        });
+        $("#clear_button").click(function(){
+            $("#slide-right").attr("disabled",true);
+            $("#detial_view").addClass("ng-hide");
+            $("#detial_view").removeClass("ng-show");
+           $("#favt_div").addClass("ng-show");
+            $("#favt_div").removeClass("ng-hide");
+            $("#detail_view").hide();
+                window.setTimeout(function(){
+                    $("#fav_div").show();
+                }, 300);
+        });
+            
+        $("#slide_back").click(function(){
+                $("#detial_view").addClass("ng-hide");
+                $("#detial_view").removeClass("ng-show");
+                $("#favt_div").addClass("ng-show");
+                $("#favt_div").removeClass("ng-hide");
+                $("#detail_view").animate({width: 'toggle'}, "fast");
+                window.setTimeout(function(){
+                    $("#fav_div").show();
+                }, 300);
+                updateFavView();
+        });
+        
+        function updateFavView(){
+            try{
+                var data = localStorage.getItem("favlist");
+                var favlist = JSON.parse(data);
+                var element =document.getElementById("fav_table");
+                var output = "";
+                if(favlist!=null){
+                    sortList();
+                    for(var i=0;i<favlist.length;i++){
+                        output+="<tr><td><a class=\"symbollink\" valueSymbol ="+favlist[i].symbol+" onclick=\"getData(this)\">"+favlist[i].symbol+"</a></td>";
+                        output+="<td>"+Number(favlist[i].close).toFixed(2)+"</td>";
+                        if(favlist[i].change>0){
+                            output+= "<td><text style=\"color: lightgreen;\">"+favlist[i].change+"("+favlist[i].percent+")</text>"+"<img src=\"http://cs-server.usc.edu:45678/hw/hw6/images/Green_Arrow_Up.png\"width=10px height=10px></img></td>";
+                        }else if(favlist[i].change<0){
+                            output+= "<td style=\"color: red;\">"+favlist[i].change+"("+favlist[i].percent+")"+"<img src=\"http://cs-server.usc.edu:45678/hw/hw6/images/Red_Arrow_Down.png\"width=10px height=10px></img></td>";
+                        }else{
+                            output+= "<td>"+favlist[i].change+"("+favlist[i].percent+")"+"</td>";
+                        }
+                        output+= "<td>"+Number(favlist[i].volume).toLocaleString()+"</td>";
+                        output+= "<td><button class=\"btn btn-default\" value =\""+favlist[i].symbol+"\" onclick = deleteFav(this)><span class=\"glyphicon glyphicon-trash\"></span></button><td></tr>";
+                    }
+                }
+
+                element.innerHTML=output ;
+            }catch(Exception){
+                
+        }
+            
+        }
+        
+        $(".star.glyphicon").click(function() {
+            $(this).toggleClass("glyphicon-star glyphicon-star-empty");
+        });
+
+        function displayPriceTable(responseObject){
+            try{
+                var outputHtml;
+                outputHtml = "<table class=\"table table-striped\" ><tr><td><b>Stock Ticker Symbol</b></td><td>"+responseObject.price.symbol+"</td></tr>";
+                outputHtml += "<tr><td><b>Last Price</b></td><td>"+Number(responseObject.price.close).toFixed(2)+"</td></tr>";
+                if(responseObject.price.change>0){
+                    outputHtml += "<tr><td><b>Change (Change Percent)</b></td><td><text style=\"color: lightgreen;\">"+responseObject.price.change+"("+responseObject.price.percent+")</text>"+"<img src=\"http://cs-server.usc.edu:45678/hw/hw6/images/Green_Arrow_Up.png\"width=10px height=10px></img></td></tr>";
+                }else if(responseObject.price.change<0){
+                    outputHtml += "<tr><td><b>Change (Change Percent)</b></td><td style=\"color: red;\">"+Math.abs(responseObject.price.change)+"("+Math.abs(responseObject.price.percent)+")"+"<img src=\"http://cs-server.usc.edu:45678/hw/hw6/images/Red_Arrow_Down.png\"width=10px height=10px></img></td></tr>";
+                }else{
+                    outputHtml += "<tr><td><b>Change (Change Percent)</b></td><td>"+responseObject.price.change+"</td></tr>";
+                }
+                outputHtml += "<tr><td><b>Timestamp</b></td><td>"+responseObject.price.timestamp+"</td></tr>";
+                outputHtml += "<tr><td><b>Open</b></td><td>"+Number(responseObject.price.open).toFixed(2)+"</td></tr>";
+                outputHtml += "<tr><td><b>Previous Close</b></td><td>"+Number(responseObject.price.prevClose).toFixed(2)+"</td></tr>";
+                outputHtml += "<tr><td><b>Day's Range</b></td><td>"+responseObject.price.range+"</td></tr>";
+                outputHtml += "<tr><td><b>Volume</b></td><td>"+Number(responseObject.price.volume).toLocaleString()+"</td></tr>";
+                outputHtml += "</table>";
+                document.getElementById("priceDiv").innerHTML = outputHtml;
+            }catch(Exception){
+                 document.getElementById("priceDiv").innerHTML = "<div class=\"alert alert-danger\" role=\"alert\">Error! Failed to get current Stock Data</div>";
+            }
+            
+        }
+            
+        function pad(s) { return (s < 10) ? '0' + s : s; }
+        
+        function displayPriceChart(responseObject){
+        try{
+            var dateArray=[];
+            var valueArray=[];
+            var volumeArray = [];
+            var j=0;
+            for(var i=130;i>=0;i--){
+                var d = Object.keys(responseObject.priceSeries)[i];
+                var date = new Date(Object.keys(responseObject.priceSeries)[i]);
+                dateArray[j] = pad(date.getUTCMonth()+1)+"/"+pad((date.getDate()+1));
+                valueArray[j] = parseFloat(responseObject.priceSeries[d]["4. close"]);
+                volumeArray[j] = parseInt(responseObject.priceSeries[d]["5. volume"]/1000000);
+                j++;
+
+            }
+            Highcharts.chart('pDiv', {
+            chart: {
+                marginBottom:100,
+                borderColor:'#b3b4b5',
+                zoomType: 'x',
+                height:330
+
+            },
+            title: {
+                text: responseObject.price.symbol+' Stock Price and Volume',
+                useHTML:true
+            },
+            subtitle: {
+                text:'<a href=" https://www.alphavantage.co/">Source: Alpha Vantage</a>',
+                useHTML:true
+            },
+            xAxis: [{
+                type: 'datetime',
+                pointStart: dateArray[0],
+              //  pointInterval: 24 * 3600 * 1000*7, // one day
+                tickInterval:7,
+                categories: dateArray
+            }],
+            yAxis: [{ // Primary yAxis
+                labels: {
+                    format: '{value}',
+                    style: {
+                        color: Highcharts.getOptions().colors[1]
+                    }
+                },
+                title: {
+                    text: 'Stock Price',
+                    style: {
+                        color: Highcharts.getOptions().colors[1]
+                    }
+                },
+            }, { // Secondary yAxisss
+                tickInterval:50,
+                title: {
+                    text: 'Volume',
+                    style: {
+                        color: Highcharts.getOptions().colors[1]
+                    }
+                },
+                labels: {
+                    format: '{value} mn',
+                    style: {
+                        color:  Highcharts.getOptions().colors[1]
+                    }
+                },
+                opposite: true
+            }],
+            tooltip: {
+                shared: false
+            },
+            legend: {
+                layout: 'horizontal',
+                x:150,
+                align: 'bottom',
+                verticalAlign: 'bottom',
+                floating: true,
+                backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'
+            },
+            plotOptions: {
+                area: {
+                    lineColor: '#0033cc',
+                    fillColor: {
+                        linearGradient: {
+                            x1: 0,
+                            y1: 0,
+                            x2: 0,
+                            y2: 1
+                        },
+                        stops: [
+                            [0, Highcharts.getOptions().colors[0]],
+                            [1, Highcharts.Color('#0033cc').setOpacity(0).get('rgba')]
+                        ]
+                    },
+                    lineWidth: 3,
+                    marker: {
+                        enabled: false,
+                        symbol: 'circle',
+                        radius: 2,
+                        states: {
+                            hover: {
+                                enabled: true
+
+                            }
+                        }
+                    }
+                }
+            },
+            series: [{
+                name: responseObject.price.symbol,
+                type: 'area',
+                data: valueArray,
+                tooltip: {
+                    valueSuffix: ''
+                },
+                color:'#0033cc',
+                },{
+                name: responseObject.price.symbol+' Volume',
+                type: 'column',
+                yAxis: 1,
+                data: volumeArray,
+                tooltip: {
+                    valueSuffix: ' mn'
+                },
+                color:'#e60000'  
+            }]
+        });
+        }catch(Exception){
+            document.getElementById("pDiv").innerHTML = "<div class=\"alert alert-danger\" role=\"alert\">Error! Failed to get Price Data</div>";
+        }
+         
+        }
+        function displaySMAChart(responseJSON){
+        try{
+            var dateArray=[];
+        var valueArray=[];
+        var j=0;
+        for(var i=130;i>=0;i--){ 
+            var date = new Date(Object.keys(responseJSON.sma["Technical Analysis: SMA"])[i]);
+            dateArray[j] = pad(date.getUTCMonth()+1)+"/"+pad((date.getDate()+1));
+            valueArray[j] = parseFloat(Object.values(responseJSON.sma["Technical Analysis: SMA"])[i].SMA);
+            j++;
+
+        }
+        Highcharts.chart('smaDiv', {
+            chart: {
+                marginBottom:100,
+                borderColor:'#b3b4b5',
+                zoomType: 'x',
+                height:330
+
+            },
+            title: {
+                text: 'Simple Moving Average (SMA)',
+                useHTML:true
+            },
+            subtitle: {
+                text:'<a href=" https://www.alphavantage.co/">Source: Alpha Vantage</a>',
+                useHTML:true
+            },
+            xAxis: [{
+                type: 'datetime',
+                tickInterval:7,
+                pointStart: dateArray[0],
+                categories: dateArray,
+                crosshair: true
+            }],
+            yAxis: [{ // Primary yAxis
+                labels: {
+                    format: '{value}',
+                    style: {
+                        color: Highcharts.getOptions().colors[1]
+                    }
+                },
+                title: {
+                    text: 'SMA',
+                    style: {
+                        color: Highcharts.getOptions().colors[1]
+                    }
+                }
+            }],
+            legend: {
+                layout: 'horizontal',
+                align: 'bottom',
+                x: 150,
+                verticalAlign: 'bottom',
+
+                floating: true,
+                backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'
+            },
+            plotOptions: {
+                line: {
+                    lineColor: '#e50202',
+                    lineWidth: 1,
+                    marker: {
+                        enabled: true,
+                        symbol: 'circle',
+                        radius: 2,
+                        states: {
+                            hover: {
+                                enabled: true
+
+                            }
+                        }
+                    },
+                    threshold: null
+                }
+            },
+            series: [{
+                name: responseDataSMA.sma["Meta Data"]["1: Symbol"],
+                type: 'line',
+                data: valueArray,
+                tooltip: {
+                    valueSuffix: ''
+                },
+                color:'#ef6e6e',
+                }]
+        });
+        }catch(Exception){
+             document.getElementById("smaDiv").innerHTML = "<div class=\"alert alert-danger\" role=\"alert\">Error! Failed to get SMA Data</div>";
+        }
+        
+        }
+        function displayEMAChart(responseJSON){
+        try{
+            var dateArray=[];
+        var valueArray=[];
+        var j=0;
+        for(var i=130;i>=0;i--){ 
+            var date = new Date(Object.keys(responseJSON.ema["Technical Analysis: EMA"])[i]);
+            dateArray[j] = pad(date.getUTCMonth()+1)+"/"+pad((date.getDate()+1));
+            valueArray[j] = parseFloat(Object.values(responseJSON.ema["Technical Analysis: EMA"])[i].EMA);
+            j++;
+
+        }
+        Highcharts.chart('emaDiv', {
+            chart: {
+                marginBottom:100,
+                borderColor:'#b3b4b5',
+                zoomType: 'x',
+                height:330
+            },
+            title: {
+                text: 'Exponential Moving Average (EMA)',
+                useHTML:true
+            },
+            subtitle: {
+                text:'<a href=" https://www.alphavantage.co/">Source: Alpha Vantage</a>',
+                useHTML:true
+            },
+            xAxis: [{
+                type: 'datetime',
+                tickInterval:7,
+                pointStart: dateArray[0],
+                categories: dateArray,
+                crosshair: true
+            }],
+            yAxis: [{ // Primary yAxis
+                labels: {
+                    format: '{value}',
+                    style: {
+                        color: Highcharts.getOptions().colors[1]
+                    }
+                },
+                title: {
+                    text: 'EMA',
+                    style: {
+                        color: Highcharts.getOptions().colors[1]
+                    }
+                }
+            }],
+            legend: {
+                layout: 'horizontal',
+                align: 'bottom',
+                verticalAlign: 'bottom',
+                x:100,
+                floating: true,
+                backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'
+            },
+            plotOptions: {
+                line: {
+                    lineColor: '#e50202',
+                    lineWidth: 1,
+                    marker: {
+                        enabled: true,
+                        symbol: 'circle',
+                        radius: 2,
+                        states: {
+                            hover: {
+                                enabled: true
+
+                            }
+                        }
+                    },
+                    threshold: null
+                }
+            },
+            series: [{
+                name: responseDataEMA.ema["Meta Data"]["1: Symbol"],
+                type: 'line',
+                data: valueArray,
+                tooltip: {
+                    valueSuffix: ''
+                },
+                color:'#ef6e6e',
+                }]
+        });
+        }catch(Exception){
+            document.getElementById("emaDiv").innerHTML = "<div class=\"alert alert-danger\" role=\"alert\">Error! Failed to get EMA Data</div>";
+        }
+        
+        }
+        function displaySTOCHChart(responseJSON){
+        try{
+            var dateArray=[];
+        var valueArray=[];
+        var valueArray2 = [];
+        var j=0;
+        for(var i=130;i>=0;i--){ 
+            var date = new Date(Object.keys(responseJSON.stoch["Technical Analysis: STOCH"])[i]);
+            dateArray[j] = pad(date.getUTCMonth()+1)+"/"+pad((date.getDate()+1));
+            valueArray[j] = parseFloat(Object.values(responseJSON.stoch["Technical Analysis: STOCH"])[i].SlowD);
+            valueArray2[j] = parseFloat(Object.values(responseJSON.stoch["Technical Analysis: STOCH"])[i].SlowK);
+            j++;
+
+        }
+        Highcharts.chart('stochDiv', {
+            chart: {
+                marginBottom:100,
+                borderColor:'#b3b4b5',
+                zoomType: 'x',
+                height:330
+                
+            },
+            title: {
+                text: 'Stochastic Oscillator (STOCH)',
+                useHTML:true
+            },
+            subtitle: {
+                text:'<a href=" https://www.alphavantage.co/">Source: Alpha Vantage</a>',
+                useHTML:true
+            },
+            xAxis: [{
+                type: 'datetime',
+                pointStart: dateArray[0],
+                tickInterval:7,
+                categories: dateArray,
+            }],
+            yAxis: [{ // Primary yAxis
+                labels: {
+                    format: '{value}',
+                    style: {
+                        color: Highcharts.getOptions().colors[1]
+                    }
+                },
+                title: {
+                    text: 'STOCH',
+                    style: {
+                        color: Highcharts.getOptions().colors[1]
+                    }
+                }
+            }],
+            legend: {
+                layout: 'horizontal',
+                align: 'bottom',
+                x: 150,
+                verticalAlign: 'bottom',
+                floating: true,
+                backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'
+            },
+            plotOptions: {
+                line: {
+
+                    lineWidth: 1,
+                    marker: {
+                        enabled: true,
+                        symbol: 'circle',
+                        radius: 2,
+                        states: {
+                            hover: {
+                                enabled: true
+
+                            }
+                        }
+                    },
+                    threshold: null
+                }
+            },
+            series: [{
+                name: responseDataSTOCH.stoch["Meta Data"]["1: Symbol"]+" SlowK",
+                type: 'line',
+                data: valueArray2,
+                tooltip: {
+                    valueSuffix: ''
+                },
+                color:'#ef6e6e',
+                },{
+                name: responseDataSTOCH.stoch["Meta Data"]["1: Symbol"]+" SlowD",
+                type: 'line',
+                data: valueArray,
+                tooltip: {
+                    valueSuffix: ''
+                },
+                color:'#5990ea',
+                }]
+        });
+        }catch(Exception){
+            document.getElementById("stochDiv").innerHTML = "<div class=\"alert alert-danger\" role=\"alert\">Error! Failed to get STOCH Data</div>";
+        }
+        
+        }
+        function displayRSIChart(responseJSON){
+        try{
+            var dateArray=[];
+        var valueArray=[];
+        var j=0;
+        for(var i=130;i>=0;i--){ 
+            var date = new Date(Object.keys(responseJSON.rsi["Technical Analysis: RSI"])[i]);
+            dateArray[j] = pad(date.getUTCMonth()+1)+"/"+pad((date.getDate()+1));
+            valueArray[j] = parseFloat(Object.values(responseJSON.rsi["Technical Analysis: RSI"])[i].RSI);
+            j++;
+
+        }
+        Highcharts.chart('rsiDiv', {
+            chart: {
+                marginBottom:100,
+                borderColor:'#b3b4b5',
+                zoomType: 'x',
+                height:330
+            },
+            title: {
+                text: 'Relative Strength Index (RSI)',
+                useHTML:true
+            },
+            subtitle: {
+                text:'<a href=" https://www.alphavantage.co/">Source: Alpha Vantage</a>',
+                useHTML:true
+            },
+            xAxis: [{
+                type: 'datetime',
+                pointStart: dateArray[0],
+                tickInterval:7,
+                categories: dateArray,
+                crosshair: true
+            }],
+            yAxis: [{ // Primary yAxis
+                labels: {
+                    format: '{value}',
+                    style: {
+                        color: Highcharts.getOptions().colors[1]
+                    }
+                },
+                title: {
+                    text: 'RSI',
+                    style: {
+                        color: Highcharts.getOptions().colors[1]
+                    }
+                }
+            }],
+            legend: {
+                layout: 'horizontal',
+                align: 'bottom',
+                x: 150,
+                verticalAlign: 'bottom',
+                floating: true,
+                backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'
+            },
+            plotOptions: {
+                line: {
+                    lineColor: '#e50202',
+                    lineWidth: 1,
+                    marker: {
+                        enabled: true,
+                        symbol: 'circle',
+                        radius: 2,
+                        states: {
+                            hover: {
+                                enabled: true
+
+                            }
+                        }
+                    },
+                    threshold: null
+                }
+            },
+            series: [{
+                name: responseDataRSI.rsi["Meta Data"]["1: Symbol"],
+                type: 'line',
+                data: valueArray,
+                tooltip: {
+                    valueSuffix: ''
+                },
+                color:'#ef6e6e',
+                }]
+        });
+        }catch(Exception){
+            document.getElementById("rsiDiv").innerHTML = "<div class=\"alert alert-danger\" role=\"alert\">Error! Failed to get RSI Data</div>";
+        }
+        
+        }
+        function displayADXChart(responseJSON){
+        try{
+                var dateArray=[];
+        var valueArray=[];
+        var j=0;
+        for(var i=130;i>=0;i--){ 
+            var date = new Date(Object.keys(responseJSON.adx["Technical Analysis: ADX"])[i]);
+            dateArray[j] = pad(date.getUTCMonth()+1)+"/"+pad((date.getDate()+1));
+            valueArray[j] = parseFloat(Object.values(responseJSON.adx["Technical Analysis: ADX"])[i].ADX);
+            j++;
+
+        }
+        Highcharts.chart('adxDiv', {
+            chart: {
+                marginBottom:100,
+                borderColor:'#b3b4b5',
+                zoomType: 'x',
+                height:330
+            },
+            title: {
+                text: 'Average Directional Movement Index (ADX)',
+                useHTML:true
+            },
+            subtitle: {
+                text:'<a href=" https://www.alphavantage.co/">Source: Alpha Vantage</a>',
+                useHTML:true
+            },
+            xAxis: [{
+                type: 'datetime',
+                tickInterval:7,
+                pointStart: dateArray[0],
+                categories: dateArray,
+            }],
+            yAxis: [{ // Primary yAxis
+                labels: {
+                    format: '{value}',
+                    style: {
+                        color: Highcharts.getOptions().colors[1]
+                    }
+                },
+                title: {
+                    text: 'ADX',
+                    style: {
+                        color: Highcharts.getOptions().colors[1]
+                    }
+                }
+            }],
+            legend: {
+                layout: 'horizontal',
+                align: 'bottom',
+                x: 150,
+                verticalAlign: 'bottom',
+                floating: true,
+                backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'
+            },
+            plotOptions: {
+                line: {
+                    lineColor: '#e50202',
+                    lineWidth: 1,
+                    marker: {
+                        enabled: true,
+                        symbol: 'circle',
+                        radius: 2,
+                        states: {
+                            hover: {
+                                enabled: true
+
+                            }
+                        }
+                    },
+                    threshold: null
+                }
+            },
+            series: [{
+                name: responseDataADX.adx["Meta Data"]["1: Symbol"],
+                type: 'line',
+                data: valueArray,
+                tooltip: {
+                    valueSuffix: ''
+                },
+                color:'#ef6e6e',
+                }]
+        });
+        }catch(Exception){
+            document.getElementById("adxDiv").innerHTML = "<div class=\"alert alert-danger\" role=\"alert\">Error! Failed to get ADX Data</div>";
+        }
+        
+        }
+        function displayCCIChart(responseJSON){
+        try{
+            var dateArray=[];
+        var valueArray=[];
+        var j=0;
+        for(var i=130;i>=0;i--){ 
+            var date = new Date(Object.keys(responseJSON.cci["Technical Analysis: CCI"])[i]);
+            dateArray[j] = pad(date.getUTCMonth()+1)+"/"+pad((date.getDate()+1));
+            valueArray[j] = parseFloat(Object.values(responseJSON.cci["Technical Analysis: CCI"])[i].CCI);
+            j++;
+
+        }
+        Highcharts.chart('cciDiv', {
+            chart: {
+                marginBottom:100,
+                zoomType: 'x',
+                height:330
+            },
+            title: {
+                text: 'Commodity Channel Index (CCI)',
+                useHTML:true
+            },
+            subtitle: {
+                text:'<a href=" https://www.alphavantage.co/">Source: Alpha Vantage</a>',
+                useHTML:true
+            },
+            xAxis: [{
+                type: 'datetime',
+                tickInterval:7,
+                pointStart: dateArray[0],
+                categories: dateArray,
+                crosshair: true
+            }],
+            yAxis: [{ // Primary yAxis
+                labels: {
+                    format: '{value}',
+                    style: {
+                        color: Highcharts.getOptions().colors[1]
+                    }
+                },
+                title: {
+                    text: 'CCI',
+                    style: {
+                        color: Highcharts.getOptions().colors[1]
+                    }
+                }
+            }],
+            legend: {
+                layout: 'horizontal',
+                align: 'bottom',
+                x: 150,
+                verticalAlign: 'bottom',
+                floating: true,
+                backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'
+            },
+            plotOptions: {
+                line: {
+                    lineColor: '#e50202',
+                    lineWidth: 1,
+                    marker: {
+                        enabled: true,
+                        symbol: 'circle',
+                        radius: 2,
+                        states: {
+                            hover: {
+                                enabled: true
+
+                            }
+                        }
+                    },
+                    threshold: null
+                }
+            },
+            series: [{
+                name: responseDataCCI.cci["Meta Data"]["1: Symbol"],
+                type: 'line',
+                data: valueArray,
+                tooltip: {
+                    valueSuffix: ''
+                },
+                color:'#ef6e6e',
+                }]
+        });
+        }catch(Exception){
+            document.getElementById("cciDiv").innerHTML = "<div class=\"alert alert-danger\" role=\"alert\">Error! Failed to get CCI Data</div>";
+        }
+        
+        }
+        function displayBBANDSChart(responseJSON){
+        try{
+            var dateArray=[];
+        var valueArray=[];
+        var valueArray2 = [];
+        var valueArray3 = [];
+        var j=0;
+        for(var i=130;i>=0;i--){ 
+            var date = new Date(Object.keys(responseJSON.bbands["Technical Analysis: BBANDS"])[i]);
+            dateArray[j] = pad(date.getUTCMonth()+1)+"/"+pad((date.getDate()+1));
+            valueArray[j] = parseFloat(Object.values(responseJSON.bbands["Technical Analysis: BBANDS"])[i]["Real Middle Band"]);
+            valueArray2[j] = parseFloat(Object.values(responseJSON.bbands["Technical Analysis: BBANDS"])[i]["Real Upper Band"]);
+            valueArray3[j] = parseFloat(Object.values(responseJSON.bbands["Technical Analysis: BBANDS"])[i]["Real Lower Band"]);
+            j++;
+
+        }
+        Highcharts.chart('bbandsDiv', {
+            chart: {
+                marginBottom:100,
+                zoomType: 'x',
+                height:330
+            },
+            title: {
+                text: 'Bollinger Bands (BBANDS)',
+                useHTML:true
+            },
+            subtitle: {
+                text:'<a href=" https://www.alphavantage.co/">Source: Alpha Vantage</a>',
+                useHTML:true
+            },
+            xAxis: [{
+                type: 'datetime',
+                pointStart: dateArray[0],
+                tickInterval:7,
+                categories: dateArray,
+                crosshair: true
+            }],
+            yAxis: [{ // Primary yAxis
+                labels: {
+                    format: '{value}',
+                    style: {
+                        color: Highcharts.getOptions().colors[1]
+                    }
+                },
+                title: {
+                    text: 'BBANDS',
+                    style: {
+                        color: Highcharts.getOptions().colors[1]
+                    }
+                }
+            }],
+            legend: {
+                layout: 'horizontal',
+                align: 'bottom',
+                x: 120,
+                verticalAlign: 'bottom',
+                floating: true,
+                backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'
+            },
+            plotOptions: {
+                line: {
+
+                    lineWidth: 1,
+                    marker: {
+                        enabled: true,
+                        symbol: 'circle',
+                        radius: 2,
+                        states: {
+                            hover: {
+                                enabled: true
+
+                            }
+                        }
+                    },
+                    threshold: null
+                }
+            },
+            series: [{
+                name: responseDataBBANDS.bbands["Meta Data"]["1: Symbol"]+" Real Middle Band",
+                type: 'line',
+                data: valueArray,
+                tooltip: {
+                    valueSuffix: ''
+                },
+                color:'#ef6e6e',
+                },{
+                name: responseDataBBANDS.bbands["Meta Data"]["1: Symbol"]+" Real Upper Band",
+                type: 'line',
+                data: valueArray2,
+                tooltip: {
+                    valueSuffix: ''
+                },
+                color:'#000000',
+                },{
+                name: responseDataBBANDS.bbands["Meta Data"]["1: Symbol"]+" Real Lower Band",
+                type: 'line',
+                data: valueArray3,
+                tooltip: {
+                    valueSuffix: ''
+                },
+                color:'#3FFF58',
+                }]
+        });
+        }catch(Exception){
+            document.getElementById("bbandsDiv").innerHTML = "<div class=\"alert alert-danger\" role=\"alert\">Error! Failed to get BBANDS Data</div>";
+        }
+        
+        }
+        function displayMACDChart(responseJSON){
+        try{
+            var dateArray=[];
+        var valueArray=[];
+        var valueArray2 = [];
+        var valueArray3 = [];
+        var j=0;
+        for(var i=130;i>=0;i--){ 
+            var date = new Date(Object.keys(responseJSON.macd["Technical Analysis: MACD"])[i]);
+            dateArray[j] = pad(date.getUTCMonth()+1)+"/"+pad((date.getDate()+1));
+            valueArray[j] = parseFloat(Object.values(responseJSON.macd["Technical Analysis: MACD"])[i]["MACD"]);
+            valueArray3[j] = parseFloat(Object.values(responseJSON.macd["Technical Analysis: MACD"])[i]["MACD_Signal"]);
+            valueArray2[j] = parseFloat(Object.values(responseJSON.macd["Technical Analysis: MACD"])[i]["MACD_Hist"]);
+            j++;
+
+        }
+        Highcharts.chart('macdDiv', {
+            chart: {
+                marginBottom:100,
+                zoomType: 'x',
+                height:330
+                
+            },
+            title: {
+                text: 'Moving Average Convergence/Divergence (MACD)',
+                useHTML:true
+            },
+            subtitle: {
+                text:'<a href=" https://www.alphavantage.co/">Source: Alpha Vantage</a>',
+                useHTML:true
+            },
+            xAxis: [{
+                type: 'datetime',
+                pointStart: dateArray[0],
+                tickInterval:7,
+                categories: dateArray,
+                crosshair: true
+            }],
+            yAxis: [{ // Primary yAxis
+                labels: {
+                    format: '{value}',
+                    style: {
+                        color: Highcharts.getOptions().colors[1]
+                    }
+                },
+                title: {
+                    text: 'MACD',
+                    style: {
+                        color: Highcharts.getOptions().colors[1]
+                    }
+                }
+            }],
+            legend: {
+                layout: 'horizontal',
+                align: 'bottom',
+                x: 120,
+                verticalAlign: 'bottom',
+                floating: true,
+                backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'
+            },
+            plotOptions: {
+                line: {
+
+                    lineWidth: 1,
+                    marker: {
+                        enabled: true,
+                        symbol: 'circle',
+                        radius: 2,
+                        states: {
+                            hover: {
+                                enabled: true
+
+                            }
+                        }
+                    },
+                    threshold: null
+                }
+            },
+            series: [{
+                name: responseDataMACD.macd["Meta Data"]["1: Symbol"]+" MACD",
+                type: 'line',
+                data: valueArray,
+                tooltip: {
+                    valueSuffix: ''
+                },
+                color:'#ef6e6e',
+                },{
+                name: responseDataMACD.macd["Meta Data"]["1: Symbol"]+" MACD_Hist",
+                type: 'line',
+                data: valueArray2,
+                tooltip: {
+                    valueSuffix: ''
+                },
+                color:'#e6e600',
+                },{
+                name: responseDataMACD.macd["Meta Data"]["1: Symbol"]+" MACD_Signal",
+                type: 'line',
+                data: valueArray3,
+                tooltip: {
+                    valueSuffix: ''
+                },
+                color:'#4334FF',
+                }]
+        });
+        }catch(Exception){
+            document.getElementById("macdDiv").innerHTML = "<div class=\"alert alert-danger\" role=\"alert\">Error! Failed to get MACD Data</div>";
+        }
+        
+        }
+        function displayHistoricalChart(responseObject){
+        try{
+            var dataArray = [];
+        var dateArray=[];
+            var valueArray=[];
+            var j=0;
+            var total;
+            var size = Object.keys(responseObject.priceSeries).length;
+            if(size>1000){
+                total=1000;
+            }else{
+                total = size;
+            }
+            for(var i=total-1;i>=0;i--){
+                var temp=[];
+                var d = Object.keys(responseObject.priceSeries)[i];
+                var date = new Date(Object.keys(responseObject.priceSeries)[i]);
+                dateArray[j] = Date.UTC(date.getFullYear(),date.getMonth(),date.getDate()+1);
+                valueArray[j] = parseFloat(responseObject.priceSeries[d]["4. close"]);
+                temp.push(dateArray[j],valueArray[j]);
+                dataArray.push(temp);
+
+                j++;
+            }
+        Highcharts.stockChart('hisDiv', {
+            rangeSelector: {
+                    buttons: [{
+                        type: 'week',
+                        count: 1,
+                        text: '1w'
+                    }, {
+                        type: 'month',
+                        count: 1,
+                        text: '1m'
+                    }, {
+                        type: 'month',
+                        count: 3,
+                        text: '3m'
+                    }, {
+                        type: 'month',
+                        count: 6,
+                        text: '6m'
+                    }, {
+                        type: 'ytd',
+                        text: 'YTD'
+                    },{
+                        type: 'year',
+                        count: 1,
+                        text: '1y'
+                    },{
+                        type: 'all',
+                        text: 'All'
+                    }],
+                    selected: 0
+                },
+            title: {
+                text: responseObject.price.symbol+' Stock Value'
+            },
+            subtitle: {
+                text:'<a href=" https://www.alphavantage.co/">Source: Alpha Vantage</a>',
+                useHTML:true
+            },
+            yAxis: [{ // Primary yAxis
+                title: {
+                    text: 'Stock Value',
+                    style: {
+                        color: Highcharts.getOptions().colors[1]
+                    }
+                }
+            }],
+            series: [{
+                name: responseObject.price.symbol,
+                data: dataArray,
+                type: 'area',
+                threshold: null,
+
+                tooltip: {
+                    shared:true,
+                    valueSuffix:""
+                },
+                color: "#66b3ff",
+                fillColor:"#66b3ff"
+            }]
+        });
+        }catch(Exception){
+            document.getElementById("macdDiv").innerHTML = "<div class=\"alert alert-danger\" role=\"alert\">Error! Failed to get MACD Data</div>";
+        }
+        
+        }
+        function displayNews(responseJSON){
+        try{
+            var output="";
+         for(i=0;i<responseJSON.news.length;i++){
+             output+= "<div class=\"panel panel-default\"><div class=\"panel-heading\"><div class =\"row\"><a id =\"news_text\" target=\"_blank\" href=\""+responseJSON.news[i].link+"\">"+responseJSON.news[i].title+"</a></div><div class =\"row\"><h5>Author: "+responseJSON.news[i].author+"</h5></div><div class =\"row\"><h5>Date: "+responseJSON.news[i].pub_date.substring(0,responseJSON.news[i].pub_date.length-6)+" EDT</h5></div></div></div>";
+         }
+         document.getElementById("newsDiv").innerHTML=output;
+        }catch(Exception){
+            document.getElementById("newsDiv").innerHTML = "<div class=\"alert alert-danger\" role=\"alert\">Error! Failed to get News Data</div>";
+        }
+         
+        }
+        
+        </script>
+    </body>
+</html>
